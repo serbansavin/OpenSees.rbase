@@ -89,11 +89,9 @@ add_library(OPS_OS_Specific_libs INTERFACE)
 
 MESSAGE("${CMAKE_BINARY_DIR}")
 
-if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-
+if(EXISTS "${CMAKE_BINARY_DIR}/generators/conan_toolchain.cmake")
    MESSAGE("USING CONAN")
-   include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-   conan_basic_setup()
+   include("${CMAKE_BINARY_DIR}/generators/conan_toolchain.cmake")
    set (Eigen3_FOUND TRUE)
    set (HDF5_FOUND TRUE)
    set (HDF5_LIBRARIES ${CONAN_LIBS_HDF5} ${CONAN_LIBS_ZLIB})
@@ -101,23 +99,29 @@ if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
    set(USING_CONAN TRUE)
    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
    set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
-   set(TCL_LIBRARIES ${TCL_LIBRARY})
-   include_directories(${TCL_INCLUDE_PATH})
-
 else()
-
   MESSAGE("NOT USING CONAN")
   include(OpenSeesFunctions)
   set(NOT_USING_CONAN TRUE)
-  set (CONAN_LIBS )
-  find_package(HDF5 REQUIRED)
-  find_package(TCL REQUIRED)
-  find_package(Eigen3 REQUIRED)
-  include_directories(${TCL_INCLUDE_DIR})
-  set(TCL_INCLUDE_PATH ${TCL_INCLUDE_DIR})
-  set(TCL_LIBRARY ${TCL_LIBRARIES})
-
 endif()
+
+MESSAGE("CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}")
+MESSAGE("CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}")
+
+find_package(HDF5 REQUIRED)
+find_package(TCL REQUIRED)
+find_package(Eigen3 REQUIRED)
+   
+set(CONAN_LIBS ${TCL_LIBRARIES})
+set(CONAN_LIB_DIRS_TCL ${TCL_INCLUDE_DIR}/../lib)
+
+MESSAGE("TCL_INCLUDE_DIR    ${TCL_INCLUDE_DIR}")
+MESSAGE("TCL_LIBRARIES      ${TCL_LIBRARIES}")
+MESSAGE("HDF5_LIBRARIES     ${HDF5_LIBRARIES}")
+MESSAGE("CONAN_LIBS  	    ${CONAN_LIBS}")
+MESSAGE("CONAN_LIB_DIRS_TCL ${CONAN_LIB_DIRS_TCL}")
+   
+include_directories(${TCL_INCLUDE_DIR})
 
 # define user-selectable options for end target
 set_property(CACHE OPS_FINAL_TARGET PROPERTY STRINGS 
@@ -409,8 +413,6 @@ target_link_libraries(OPS_Numerics INTERFACE
        ${EIGENAPI_LIBRARIES}
 )
 
-set(TCL_LIBRARIES ${TCL_LIBRARY})
-
 
 #
 # OpenSees OBJECT LIBRARIES
@@ -460,7 +462,7 @@ add_library(OPS_PFEM               OBJECT EXCLUDE_FROM_ALL)
 add_library(OPS_InterpTcl          STATIC)
 
 target_compile_definitions(OPS_InterpTcl PUBLIC _TCL85)
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/generators/conan_toolchain.cmake")
   target_include_directories(OPS_InterpTcl PUBLIC ${TCL_INCLUDE_PATH})
   target_link_libraries(OPS_InterpTcl PRIVATE ${TCL_LIBRARIES})
 endif()
@@ -554,7 +556,7 @@ add_executable(OpenSees EXCLUDE_FROM_ALL
   ${OPS_SRC_DIR}/actor/objectBroker/FEM_ObjectBrokerAllClasses.cpp
 )
 
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/generators/conan_toolchain.cmake")
   target_include_directories(OpenSees PUBLIC ${TCL_INCLUDE_PATH})
 
   FILE(COPY ${CONAN_LIB_DIRS_TCL}/tcl8.6

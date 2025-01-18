@@ -1,3 +1,33 @@
+# OpenSees with rBase flavour
+
+OpenSees's numerical data files are implemented with rBase kit.
+OpenSees serves as a trial for the capabilities of the rBase lib.
+
+This OpenSees builds with
+-------------------------
+Python 3.12.5
+Visual Studio 17 2022
+Intel OneAPI 2024.2 (Base and HPC toolkits)
+conan 2.11.0
+-----------------------------
+Use the steps below to build, as in parent OpenSees.
+-----------------------------
+mkdir build
+cd build
+call "C:\Program Files (x86)\Intel\oneAPI\setVars.bat" intel64 mod
+conan install .. --build missing --settings compiler.runtime="static"
+cmake .. -DBLA_STATIC=ON -DMKL_LINK=static -DMKL_INTERFACE_FULL=intel_lp64 -DMUMPS_DIR="..\..\mumps\build"
+cmake --build . --config Release --target OpenSees -j8
+cmake --build . --config Release --target OpenSeesPy -j8
+copy "C:\Program Files (x86)\Intel\oneAPI\compiler\2024.2\bin\libiomp5md.dll" .\Release
+
+-----------------------------------------------------------------
+Files
+  - CMakeLists.txt
+  - conanfile.py
+have been modified to accomodate conan's upgrade from 1.x to 2.x.
+-----------------------------------------------------------------
+
 # OpenSees Source Code Repository
 
 This git repository contains all revisions to OpenSees source code since Version 2.3.2.

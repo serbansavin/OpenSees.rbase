@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conan import ConanFile, tools
+from conan.tools.cmake import cmake_layout
 import os
 
 class OpenSeesDependencies(ConanFile):
@@ -7,20 +8,17 @@ class OpenSeesDependencies(ConanFile):
     description = "Provides Software Packages needed to build OpenSees"
     license = "BSD 3-Clause"
     author = "fmk fmckenna@berkeley.edu"
-    settings = {"os": None, "build_type": None, "compiler": None, "arch": ["x86_64"]}
+    settings = "os", "build_type", "compiler", "arch"
     options = {"shared": [True, False]}
-    default_options = {"mkl-static:threaded": False, "ipp-static:simcenter_backend": True}    
-    generators = "cmake", "cmake_find_package"
+    default_options = {"mkl-static/*:threaded": False, "ipp-static/*:simcenter_backend": True}
+    generators = "CMakeToolchain", "CMakeDeps"
     build_policy = "missing"
-    requires = "hdf5/1.14.0", \
-        "tcl/8.6.11", \
-        "zlib/1.2.13", \
-        "eigen/3.4.0"
+    requires = "tcl/8.6.11", "hdf5/1.14.0", "eigen/3.4.0"
     # Custom attributes for Bincrafters recipe conventions
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     # Set short paths for Windows
-    short_paths = True    
+    short_paths = True
     scm = {
         "type": "git",  # Use "type": "svn", if local repo is managed using SVN
         "subfolder": _source_subfolder,
@@ -28,18 +26,11 @@ class OpenSeesDependencies(ConanFile):
         "revision": "auto"
     }
 
+    def layout(self):
+        cmake_layout(self)
 
     def configure(self):
         self.options.shared = False
-
-    def configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
-    
-    def build(self):
-        cmake = self.configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
