@@ -4,14 +4,14 @@ OpenSees's numerical data files are implemented with rBase kit.
 OpenSees serves as a trial for the capabilities of the rBase lib.
 
 This OpenSees builds with
--------------------------
+
 Python 3.12.5
 Visual Studio 17 2022
 Intel OneAPI 2024.2 (Base and HPC toolkits)
 conan 2.11.0
------------------------------
+
 Use the steps below to build, as in parent OpenSees.
------------------------------
+
 mkdir build
 cd build
 call "C:\Program Files (x86)\Intel\oneAPI\setVars.bat" intel64 mod
